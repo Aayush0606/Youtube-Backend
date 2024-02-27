@@ -1,5 +1,4 @@
 import "dotenv/config";
-
 import { PORT } from "./constants.js";
 import { connectDB } from "./db/db.js";
 import app from "./app.js";
