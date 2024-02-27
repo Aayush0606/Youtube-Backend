@@ -5,7 +5,7 @@ import app from "./app.js";
 
 connectDB()
   .then(() => {
-    app.listen(8081, () => {
+    app.listen(PORT, () => {
       console.log(`Backend server started at http://localhost:${PORT}`);
     });
   })

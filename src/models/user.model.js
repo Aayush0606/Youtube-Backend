@@ -75,6 +75,7 @@ userSchema.methods.generateAccessToken = async function (password) {
     { expiresIn: ACCESS_TOKEN_EXPIRY }
   );
 };
+
 userSchema.methods.generateRefreshToken = async function (password) {
   return jwt.sign(
     {
