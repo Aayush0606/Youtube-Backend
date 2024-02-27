@@ -14,7 +14,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please enter username"],
       unique: [true, "Username already exist"],
-      lowercase: true,
       trim: true,
       index: true,
     },
@@ -22,7 +21,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please enter email"],
       unique: [true, "Email already exist"],
-      lowercase: true,
       trim: true,
     },
     fullName: {
