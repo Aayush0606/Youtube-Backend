@@ -2,7 +2,6 @@ import { Router } from "express";
 import {
   registerUser,
   loginUser,
-  imageCleanup,
   logoutUser,
   updateUser,
   refreshTokenUser,
@@ -10,6 +9,7 @@ import {
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
+import { imageCleanup } from "../utils/imageCleanup.js";
 
 const userRouter = Router();
 

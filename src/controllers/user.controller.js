@@ -4,14 +4,7 @@ import { User } from "../models/user.model.js";
 import { cloudinaryUpload } from "../utils/cloudinaryUpload.js";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
 import jwt from "jsonwebtoken";
-import fs from "fs";
 import bcrypt from "bcrypt";
-
-const imageCleanup = async (req, res, next) => {
-  if (req.body.avatarLocalUrl) fs.unlinkSync(req.body.avatarLocalUrl);
-  if (req.body.coverImageLocalUrl) fs.unlinkSync(req.body.coverImageLocalUrl);
-  return res;
-};
 
 const registerUser = asyncHandler(async (req, res, next) => {
   const { username, email, fullName, password } = req.body;
@@ -233,7 +226,6 @@ const deleteUser = asyncHandler(async (req, res, next) => {
 export {
   registerUser,
   loginUser,
-  imageCleanup,
   logoutUser,
   updateUser,
   refreshTokenUser,

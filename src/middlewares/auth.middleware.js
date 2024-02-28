@@ -12,6 +12,8 @@ const authenticate = asyncHandler(async (req, res, next) => {
     if (!token)
       return res.status(401).json(new ApiError(401, "Unauthorized access"));
     const userData = jwt.verify(token, ACCESS_TOKEN_SECRET);
+    if (!userData)
+      return res.status(401).json(new ApiError(401, "Unauthorized access"));
     const user = await User.findById(userData._id);
     if (!user) return res.status(401).json(new ApiError(401, "Invalid token"));
     req.body.user = user;
