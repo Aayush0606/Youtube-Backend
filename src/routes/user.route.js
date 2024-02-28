@@ -12,7 +12,7 @@ import {
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
-import { imageCleanup } from "../utils/imageCleanup.js";
+import { imageCleanup } from "../utils/fileCleanup.js";
 
 const userRouter = Router();
 
