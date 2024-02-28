@@ -7,7 +7,7 @@ import {
 } from "../constants.js";
 
 cloudinary.config({
-  cloud_name: CLOUDINARY_CLOUD_NAME,
+  cloud_name: CLOUDINARY_CLOUD_NAME + "dhh",
   api_key: CLOUDINARY_API_KEY,
   api_secret: CLOUDINARY_SECRET,
 });
@@ -18,12 +18,10 @@ const cloudinaryUpload = async (filePath) => {
     const uploadObject = await cloudinary.uploader.upload(filePath, {
       resource_type: "auto",
     });
-    console.log("File uploaded successfuly ", uploadObject);
-    fs.unlinkSync(filePath);
     return uploadObject;
   } catch (error) {
-    fs.unlinkSync(filePath);
     console.log("Not able to upload to cloudinary ", error);
+    return null;
   }
 };
 
