@@ -1,5 +1,5 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError, ApiResopnse } from "../utils/ApiResolve.js";
+import { ApiError, ApiResponse } from "../utils/ApiResolve.js";
 import { User } from "../models/user.model.js";
 import { cloudinaryUpload } from "../utils/cloudinaryUpload.js";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
@@ -69,7 +69,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     ...user._doc,
     password: undefined,
   };
-  res.status(200).json(new ApiResopnse(200, "User created", responseData));
+  res.status(200).json(new ApiResponse(200, "User created", responseData));
   return next();
 });
 
@@ -112,7 +112,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .json(new ApiResopnse(200, "Your user data", responseData));
+    .json(new ApiResponse(200, "Your user data", responseData));
 });
 
 const logoutUser = asyncHandler(async (req, res, next) => {
@@ -128,7 +128,7 @@ const logoutUser = asyncHandler(async (req, res, next) => {
     .status(200)
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
-    .json(new ApiResopnse(200, "Logout successful!!"));
+    .json(new ApiResponse(200, "Logout successful!!"));
 });
 
 const updateUser = asyncHandler(async (req, res, next) => {
@@ -165,7 +165,7 @@ const updateUser = asyncHandler(async (req, res, next) => {
 
     if (data.password) data.password = await bcrypt.hash(data.password, 10);
     await User.findByIdAndUpdate(user._id, data);
-    res.status(200).json(new ApiResopnse(200, "User updated!!"));
+    res.status(200).json(new ApiResponse(200, "User updated!!"));
     next();
   } catch (error) {
     res
@@ -206,7 +206,7 @@ const refreshTokenUser = asyncHandler(async (req, res, next) => {
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
-    .json(new ApiResopnse(200, "Your user data", responseData));
+    .json(new ApiResponse(200, "Your user data", responseData));
 });
 
 const deleteUser = asyncHandler(async (req, res, next) => {
@@ -220,7 +220,134 @@ const deleteUser = asyncHandler(async (req, res, next) => {
     .status(200)
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
-    .json(new ApiResopnse(200, "User accout deleted successfully!!"));
+    .json(new ApiResponse(200, "User accout deleted successfully!!"));
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "User fetched successfully", req.user));
+});
+
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+  if (!username?.trim()) {
+    return res.status(400).json(new ApiError(400, "Username is missing!!"));
+  }
+  const channel = await User.aggregate([
+    {
+      $match: {
+        username: username,
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers",
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscribedTo",
+      },
+    },
+    {
+      $addFields: {
+        subscribersCount: {
+          $size: "$subscribers",
+        },
+        subscribedToCount: {
+          $size: "$subscribedTo",
+        },
+        isSubscribed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        fullName: 1,
+        username: 1,
+        subscribersCount: 1,
+        subscribedToCount: 1,
+        isSubscribed: 1,
+        avatar: 1,
+        coverImage: 1,
+        email: 1,
+      },
+    },
+  ]);
+
+  if (!channel?.length) {
+    res.status(400).json(new ApiError(404, "Channel doesn't exist!!"));
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Channel fetched!!", channel[0]));
+});
+
+const getWatchHistory = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user._id),
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              pipeline: [
+                {
+                  $project: {
+                    fullName: 1,
+                    username: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              owner: {
+                $first: "$owner",
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        "Watch history fetched successfully",
+        user[0].watchHistory
+      )
+    );
 });
 
 export {
@@ -230,4 +357,7 @@ export {
   updateUser,
   refreshTokenUser,
   deleteUser,
+  getCurrentUser,
+  getUserChannelProfile,
+  getWatchHistory,
 };

@@ -7,7 +7,7 @@ class ApiError {
   }
 }
 
-class ApiResopnse {
+class ApiResponse {
   constructor(statusCode = 200, message = "Success", data = []) {
     this.statusCode = statusCode;
     this.message = message;
@@ -16,4 +16,4 @@ class ApiResopnse {
   }
 }
 
-export { ApiError, ApiResopnse };
+export { ApiError, ApiResponse };
