@@ -6,6 +6,7 @@ import {
   logoutUser,
   updateUser,
   refreshTokenUser,
+  deleteUser,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
@@ -29,12 +30,13 @@ userRouter.route("/register").post(
 
 userRouter.route("/login").get(loginUser);
 
+userRouter.route("/delete").delete(authenticate, deleteUser);
+
 userRouter.route("/logout").post(authenticate, logoutUser);
 
 userRouter.route("/refresh-token").post(refreshTokenUser);
 
 userRouter.route("/update").put(
-  authenticate,
   upload.fields([
     {
       name: "avatar",
@@ -45,6 +47,7 @@ userRouter.route("/update").put(
       maxCount: 1,
     },
   ]),
+  authenticate,
   updateUser,
   imageCleanup
 );

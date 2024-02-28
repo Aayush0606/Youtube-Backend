@@ -3,7 +3,9 @@ import { ApiError, ApiResopnse } from "../utils/ApiResolve.js";
 import { User } from "../models/user.model.js";
 import { cloudinaryUpload } from "../utils/cloudinaryUpload.js";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
+import jwt from "jsonwebtoken";
 import fs from "fs";
+import bcrypt from "bcrypt";
 
 const imageCleanup = async (req, res, next) => {
   if (req.body.avatarLocalUrl) fs.unlinkSync(req.body.avatarLocalUrl);
@@ -50,16 +52,14 @@ const registerUser = asyncHandler(async (req, res, next) => {
       .json(new ApiError(409, "Same username or email already exist!!"));
     return next();
   }
-  const avatarUpload = null;
-  const coverImageUpload = null;
-  // const avatarUpload = await cloudinaryUpload(avatar);
-  // const coverImageUpload = await cloudinaryUpload(coverImage);
-  // if (!avatarUpload) {
-  //    res
-  //     .status(500)
-  //     .json(new ApiError(500, "Can't upload image, cloudinary error!!"));
-  //     return next();
-  // }
+  const avatarUpload = await cloudinaryUpload(avatar);
+  const coverImageUpload = await cloudinaryUpload(coverImage);
+  if (!avatarUpload) {
+    res
+      .status(500)
+      .json(new ApiError(500, "Can't upload image, cloudinary error!!"));
+    return next();
+  }
   const user = await new User({
     username,
     email,
@@ -100,7 +100,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
   }
   const isValidUser = await user.isPasswordValid(password);
   if (!isValidUser) {
-    res.status(401).json(new ApiError(401, "Wrong credentials!!"));
+    return res.status(401).json(new ApiError(401, "Wrong credentials!!"));
   }
   const accessToken = await user.generateAccessToken();
   const refreshToken = await user.generateRefreshToken();
@@ -139,26 +139,54 @@ const logoutUser = asyncHandler(async (req, res, next) => {
 });
 
 const updateUser = asyncHandler(async (req, res, next) => {
-  const { user, data } = req.body.user;
+  try {
+    const { user, data } = req.body;
 
-  const avatar = (req.files?.avatar && req.files?.avatar[0]?.path) || null;
-  const coverImage =
-    (req.files?.coverImage && req.files?.coverImage[0]?.path) || null;
+    const avatar = (req.files?.avatar && req.files?.avatar[0]?.path) || null;
+    const coverImage =
+      (req.files?.coverImage && req.files?.coverImage[0]?.path) || null;
 
-  req.body.avatarLocalUrl = avatar;
-  req.body.coverImageLocalUrl = coverImage;
+    req.body.avatarLocalUrl = avatar;
+    req.body.coverImageLocalUrl = coverImage;
 
-  // if(avatar) data.avatar=await cloudinaryUpload(avatar);
-  // if(avatar) data.coverImage=await cloudinaryUpload(coverImage);
+    const email = data?.email || "";
+    const username = data?.username || "";
+    const userDetails = await User.findOne({
+      $or: [{ email }, { username }],
+    });
+    if (userDetails) {
+      res
+        .status(409)
+        .json(new ApiError(409, "Same username or email already exist!!"));
+      return next();
+    }
 
-  await User.findByIdAndUpdate(user._id, data);
+    if (avatar)
+      data.avatar = await cloudinaryUpload(avatar).then(
+        (data) => data.secure_url
+      );
+    if (coverImage)
+      data.coverImage = await cloudinaryUpload(coverImage).then(
+        (data) => data.secure_url
+      );
 
-  next();
+    if (data.password) data.password = await bcrypt.hash(data.password, 10);
+    await User.findByIdAndUpdate(user._id, data);
+    res.status(200).json(new ApiResopnse(200, "User updated!!"));
+    next();
+  } catch (error) {
+    res
+      .status(500)
+      .json(
+        new ApiError(500, "Internal server error,can't update user!!", error)
+      );
+    next();
+  }
 });
 
 const refreshTokenUser = asyncHandler(async (req, res, next) => {
   const token =
-    req.cookies?.accessToken ||
+    req.cookies?.refreshToken ||
     req.header("Authorization")?.replace("Bearer ", "");
   if (!token)
     return res.status(401).json(new ApiError(401, "Unauthorized access"));
@@ -188,6 +216,20 @@ const refreshTokenUser = asyncHandler(async (req, res, next) => {
     .json(new ApiResopnse(200, "Your user data", responseData));
 });
 
+const deleteUser = asyncHandler(async (req, res, next) => {
+  const { user } = req.body;
+  await User.findByIdAndDelete(user._id);
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResopnse(200, "User accout deleted successfully!!"));
+});
+
 export {
   registerUser,
   loginUser,
@@ -195,4 +237,5 @@ export {
   logoutUser,
   updateUser,
   refreshTokenUser,
+  deleteUser,
 };
