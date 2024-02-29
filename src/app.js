@@ -31,8 +31,10 @@ app.use((req, res, next) => {
 import { userRouter } from "./routes/user.route.js";
 import { commentRouter } from "./routes/comment.route.js";
 import { likeRouter } from "./routes/like.route.js";
+import { dashboardRouter } from "./routes/dashboard.route.js";
 app.use("/api/users", userRouter);
 app.use("/api/comments", commentRouter);
 app.use("/api/likes", likeRouter);
+app.use("/api/dashboard", dashboardRouter);
 
 export default app;
