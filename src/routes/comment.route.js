@@ -7,11 +7,9 @@ import {
 } from "../controllers/comment.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 
-const router = Router();
+const commentRouter = Router();
+commentRouter.use(authenticate);
+commentRouter.route("/:videoId").get(getVideoComments).post(addComment);
+commentRouter.route("/c/:commentId").delete(deleteComment).put(updateComment);
 
-router.use(authenticate);
-
-router.route("/:videoId").get(getVideoComments).post(addComment);
-router.route("/c/:commentId").delete(deleteComment).patch(updateComment);
-
-export default router;
+export { commentRouter };

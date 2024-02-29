@@ -28,8 +28,12 @@ app.use((req, res, next) => {
   next();
 });
 
+//! USER
 import { userRouter } from "./routes/user.route.js";
-
 app.use("/api/users", userRouter);
+
+//! COMMENT
+import { commentRouter } from "./routes/comment.route.js";
+app.use("/api/comments", commentRouter);
 
 export default app;

@@ -7,11 +7,11 @@ import {
 } from "../controllers/tweet.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 
-const router = Router();
-router.use(authenticate);
+const tweetRouter = Router();
+tweetRouter.use(authenticate);
 
-router.route("/").post(createTweet);
-router.route("/user/:userId").get(getUserTweets);
-router.route("/:tweetId").patch(updateTweet).delete(deleteTweet);
+tweetRouter.route("/").post(createTweet);
+tweetRouter.route("/user/:userId").get(getUserTweets);
+tweetRouter.route("/:tweetId").patch(updateTweet).delete(deleteTweet);
 
-export default router;
+export { tweetRouter };

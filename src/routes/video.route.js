@@ -10,10 +10,10 @@ import {
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
 
-const router = Router();
-router.use(authenticate);
+const videoRouter = Router();
+videoRouter.use(authenticate);
 
-router
+videoRouter
   .route("/")
   .get(getAllVideos)
   .post(
@@ -30,12 +30,12 @@ router
     publishAVideo
   );
 
-router
+videoRouter
   .route("/:videoId")
   .get(getVideoById)
   .delete(deleteVideo)
   .patch(upload.single("thumbnail"), updateVideo);
 
-router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
+videoRouter.route("/toggle/publish/:videoId").patch(togglePublishStatus);
 
-export default router;
+export { videoRouter };

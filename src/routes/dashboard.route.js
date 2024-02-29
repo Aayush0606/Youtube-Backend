@@ -5,11 +5,11 @@ import {
 } from "../controllers/dashboard.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 
-const router = Router();
+const dashboardRouter = Router();
 
-router.use(authenticate);
+dashboardRouter.use(authenticate);
 
-router.route("/stats").get(getChannelStats);
-router.route("/videos").get(getChannelVideos);
+dashboardRouter.route("/stats").get(getChannelStats);
+dashboardRouter.route("/videos").get(getChannelVideos);
 
-export default router;
+export { dashboardRouter };
