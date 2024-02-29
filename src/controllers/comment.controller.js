@@ -3,7 +3,6 @@ import { Comment } from "../models/comment.model.js";
 import { Video } from "../models/video.model.js";
 import { ApiError, ApiResponse } from "../utils/ApiResolve.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import mongoose from "mongoose";
 
 const getVideoComments = asyncHandler(async (req, res, next) => {
   try {

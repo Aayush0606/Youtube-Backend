@@ -1,6 +1,12 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError, ApiResponse } from "../utils/ApiResolve.js";
 import { User } from "../models/user.model.js";
+import { Like } from "../models/like.model.js";
+import { Video } from "../models/video.model.js";
+import { Tweet } from "../models/tweet.model.js";
+import { Comment } from "../models/comment.model.js";
+import { Playlist } from "../models/playlist.model.js";
+import { Subscription } from "../models/subscription.model.js";
 import { cloudinaryUpload } from "../utils/cloudinaryUpload.js";
 import { REFRESH_TOKEN_SECRET } from "../constants.js";
 import mongoose from "mongoose";
@@ -212,6 +218,14 @@ const refreshTokenUser = asyncHandler(async (req, res, next) => {
 
 const deleteUser = asyncHandler(async (req, res, next) => {
   const { user } = req.body;
+  await Like.deleteMany({ likedBy: user._id });
+  await Video.deleteMany({ owner: user._id });
+  await Tweet.deleteMany({ owner: user._id });
+  await Playlist.deleteMany({ owner: user._id });
+  await Comment.deleteMany({ owner: user._id });
+  await Subscription.deleteMany({
+    $or: [{ subscriber: user._id }, { channel: user._id }],
+  });
   await User.findByIdAndDelete(user._id);
   const options = {
     httpOnly: true,
