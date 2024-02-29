@@ -15,18 +15,15 @@ const playlistRouter = Router();
 playlistRouter.use(authenticate);
 
 playlistRouter.route("/").post(createPlaylist);
-
 playlistRouter
   .route("/:playlistId")
   .get(getPlaylistById)
-  .patch(updatePlaylist)
+  .put(updatePlaylist)
   .delete(deletePlaylist);
-
-playlistRouter.route("/add/:videoId/:playlistId").patch(addVideoToPlaylist);
+playlistRouter.route("/add/:videoId/:playlistId").put(addVideoToPlaylist);
 playlistRouter
   .route("/remove/:videoId/:playlistId")
-  .patch(removeVideoFromPlaylist);
-
+  .put(removeVideoFromPlaylist);
 playlistRouter.route("/user/:userId").get(getUserPlaylists);
 
 export { playlistRouter };
