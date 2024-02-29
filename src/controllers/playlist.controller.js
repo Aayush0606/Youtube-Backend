@@ -11,7 +11,7 @@ const createPlaylist = asyncHandler(async (req, res, next) => {
       return res.status(400).json(new ApiError(400, "Name is required!!"));
     if (!name.trim() === "")
       return res.status(400).json(new ApiError(400, "Name is required!!"));
-    const newPlaylist = await Playlist({
+    const newPlaylist = await new Playlist({
       name,
       description,
       owner: user._id,

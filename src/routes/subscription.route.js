@@ -13,7 +13,6 @@ subscriptionRouter
   .route("/c/:channelId")
   .get(getSubscribedChannels)
   .post(toggleSubscription);
-
 subscriptionRouter.route("/u/:subscriberId").get(getUserChannelSubscribers);
 
 export { subscriptionRouter };

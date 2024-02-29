@@ -12,6 +12,6 @@ tweetRouter.use(authenticate);
 
 tweetRouter.route("/").post(createTweet);
 tweetRouter.route("/user/:userId").get(getUserTweets);
-tweetRouter.route("/:tweetId").patch(updateTweet).delete(deleteTweet);
+tweetRouter.route("/:tweetId").put(updateTweet).delete(deleteTweet);
 
 export { tweetRouter };
