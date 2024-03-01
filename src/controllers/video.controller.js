@@ -18,6 +18,7 @@ const publishAVideo = asyncHandler(async (req, res, next) => {
 const getVideoById = asyncHandler(async (req, res, next) => {
   const { videoId } = req.params;
   //TODO: get video by id
+  //TODO: increase view count by 1
 });
 
 const updateVideo = asyncHandler(async (req, res, next) => {

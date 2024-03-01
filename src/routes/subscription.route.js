@@ -11,8 +11,8 @@ subscriptionRouter.use(authenticate);
 
 subscriptionRouter
   .route("/c/:channelId")
-  .get(getSubscribedChannels)
+  .get(getUserChannelSubscribers)
   .post(toggleSubscription);
-subscriptionRouter.route("/u/:subscriberId").get(getUserChannelSubscribers);
+subscriptionRouter.route("/u/:subscriberId").get(getSubscribedChannels);
 
 export { subscriptionRouter };
