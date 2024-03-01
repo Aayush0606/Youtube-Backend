@@ -15,7 +15,7 @@ cloudinary.config({
 const cloudinaryUpload = async (filePath) => {
   try {
     if (!filePath) return null;
-    const uploadObject = await cloudinary.uploader.upload(filePath, {
+    const uploadObject = await cloudinary.uploader.upload_large(filePath, {
       resource_type: "auto",
     });
     return uploadObject;

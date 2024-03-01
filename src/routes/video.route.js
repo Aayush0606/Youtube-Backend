@@ -9,6 +9,7 @@ import {
 } from "../controllers/video.controller.js";
 import { authenticate } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import { videoCleanup } from "../utils/fileCleanup.js";
 
 const videoRouter = Router();
 videoRouter.use(authenticate);
@@ -27,15 +28,14 @@ videoRouter
         maxCount: 1,
       },
     ]),
-    publishAVideo
+    publishAVideo,
+    videoCleanup
   );
-
 videoRouter
   .route("/:videoId")
   .get(getVideoById)
   .delete(deleteVideo)
-  .patch(upload.single("thumbnail"), updateVideo);
-
-videoRouter.route("/toggle/publish/:videoId").patch(togglePublishStatus);
+  .put(upload.single("thumbnail"), updateVideo, videoCleanup);
+videoRouter.route("/toggle/publish/:videoId").put(togglePublishStatus);
 
 export { videoRouter };
